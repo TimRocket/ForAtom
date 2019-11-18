@@ -103,12 +103,12 @@ void setup()
                   Adafruit_BMP280::FILTER_X16,      /* Filtering.            */
                   Adafruit_BMP280::STANDBY_MS_1);   /* Standby time.         */
 
-  if (!SD.begin(53)) {
+  if (!SD.begin(10)) {
     error = true;
   }
-  myFile = SD.open("DataLogger.txt", FILE_WRITE);
+ myFile = SD.open("BoiteNoire.txt", FILE_WRITE);
      myFile.println("Time;Alt;AltMax");
-
+myFile.close();
   if (error == false) {
     current_state = READY;
   }
@@ -143,7 +143,7 @@ void loop()
                       Adafruit_BMP280::SAMPLING_X16,
                       Adafruit_BMP280::FILTER_X16,
                       Adafruit_BMP280::STANDBY_MS_1);
-
+      myFile = SD.open("BoiteNoire.txt", FILE_WRITE);
       Serial.println("flight");
       while (notLanded == 1) {
         while (millis() - timeStart < 5000) {
