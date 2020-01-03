@@ -1,112 +1,12 @@
-//#define debbugging true
+#define debugger true
 
 #include <Arduino.h>
 
-/************************************************************
-
-
-
-
-
- ***********************************************************/
-#include <Wire.h>
-#include <SD.h>
-#include <SPI.h>
-#include <Adafruit_BMP280.h>
-Adafruit_BMP280 bmp; // I2C
-float newZero = 0;
-float pres = 0;
-float mini = 9999999999;
-float maxi = -999999999;
-float sum = 0;
-float altMax = 0;
-float alt = 0;
-unsigned long timeData;
-
-File myFile;
-
-void setup() {
-  Serial.begin(9600);
-  Serial.println(F("BMP280 test"));
-  if (!bmp.begin()) {
-    Serial.println(F("Could not find a valid BMP280 sensor, check wiring!"));
-    while (1);
-  }
-
-  /*
-     two registers are used :
-
-      0xF4 consists of:
-
-    3 bits osrs_t (measure temperature 0, 1, 2, 4, 8 or 16 times);
-    3 bits osrs_p (measure pressure 0, 1, 2, 4, 8 or 16 times); and
-    2 bits Mode (Sleep, Forced (ie Single Shot), Normal (ie continuous).
-
-    0xF5 consists of:
-
-    3 bits t_sb (standby time, 0.5ms to 4000 ms);
-    3 bits filter (see below); and
-    1 bit spiw_en which selects SPI = 1 or I2C = 0.
-  */
- if (!SD.begin(10)) {
-    Serial.println("initialization failed!");
-    while (1);
-  }
-  bmp.setSampling(Adafruit_BMP280::MODE_NORMAL,     /* Operating Mode.       */
-                  Adafruit_BMP280::SAMPLING_NONE,   /* Temp. oversampling    */
-                  Adafruit_BMP280::SAMPLING_X16,    /* Pressure oversampling */
-                  Adafruit_BMP280::FILTER_X16,       /* Filtering.            */
-                  Adafruit_BMP280::STANDBY_MS_1);   /* Standby time.         */
-  delay(2000);
-  for (int i = 0; i <= 6; i++) {
-  newZero = bmp.readPressure() + newZero;
-  }
-  newZero = newZero / 700;
-  timeData = millis();
-  myFile = SD.open("example.txt", FILE_WRITE);
-     myFile.println("Time,Alt,AltMax");
-    // close the file:
-}
-
-
-
-
-
-void loop() {
-  while((millis()-timeData)<5000){
-  for (int i = 0; i <= 9; i++) {
-    pres = bmp.readPressure();
-    sum = pres + sum;
-    if (pres < mini) {
-      mini = pres;
-    }
-    if (pres > maxi) {
-      maxi = pres;
-    }
-  }
-  pres = (sum - (mini + maxi)) / 800;
-  alt = 44330 * (1.0 - pow(pres / newZero, 0.1903));
-  if (alt > altMax) {
-    altMax = alt;
-  }
-
-   myFile.print(millis());
-   myFile.print(alt);
-   myFile.println(altMax);
-
-  pres = 0;
-  mini = 9999999999;
-  maxi = -999999999;
-  sum = 0;
-  }
-      myFile.close();
-
-}
-/*
-#include <Wire.h>
-#include <SD.h>
-#include <SPI.h>
-#include <Adafruit_BMP280.h>
+#include <Wire.h> //I2C
+#include <SD.h>//SD
+#include <SPI.h>//SPI
+#include <Adafruit_BMP280.h>//Pression
+#include "rgb_lcd.h"//LCD
 
 #define buttonGo 2
 #define ledReady 6
@@ -125,6 +25,7 @@ float firstAlt = 0;
 float prevAlt = 0;
 float currentPres = 0;
 
+//bool debugger= false;
 bool desc = false;
 bool error = false;
 bool notLanded = true;
@@ -136,8 +37,8 @@ unsigned long timeApog;
 
 float average_pres(byte n);
 
-File myFile;
-
+File dataLogger;
+rgb_lcd lcd;
 
 //status of the state machine
 typedef enum  {
@@ -187,8 +88,7 @@ void setup()
     pinMode(ledFlight, OUTPUT);
     digitalWrite(ledReady, LOW);
     digitalWrite(ledFlight, LOW);
-
-  #if (debbugging == 1)
+#if (debugger== true)
   {
     Serial.begin(9600);
     Serial.println(F("setup"));  // ecrire les etats des composants qui marchent ou inverse?
@@ -208,9 +108,9 @@ void setup()
   if (!SD.begin(10)) {
     error = true;
   }
- myFile = SD.open("EXAMPLE.txt", FILE_WRITE);
-     myFile.println("Time;Alt;AltMax");
-myFile.close();
+ dataLogger = SD.open("EXAMPLE.txt", FILE_WRITE);
+     dataLogger.println("Time;Alt;AltMax");
+dataLogger.close();
   if (error == false) {
     current_state = READY;
   }
@@ -245,7 +145,7 @@ void loop()
                       Adafruit_BMP280::SAMPLING_X16,
                       Adafruit_BMP280::FILTER_X16,
                       Adafruit_BMP280::STANDBY_MS_1);
-      myFile = SD.open("EXAMPLE.txt", FILE_WRITE);
+      dataLogger = SD.open("EXAMPLE.txt", FILE_WRITE);
       Serial.println("flight");
       while (notLanded == 1) {
         while (millis() - timeStart < 5000) {
@@ -267,7 +167,7 @@ void loop()
 
         alt = 44330 * (1.0 - pow(currentPres / newZero, 0.1903));
 
-        #if (debbugging == 1)
+        #if (debugger == true)
         {
           Serial.print(alt * 100); //serial plotter/monitor
           Serial.print(" ");
@@ -276,12 +176,12 @@ void loop()
         }
         #endif
 
-        myFile.print(millis());
-        myFile.print(";");
-        myFile.print(alt);
-        myFile.print(";");
-        myFile.print(altMax);
-        myFile.println(";");
+        dataLogger.print(millis());
+        dataLogger.print(";");
+        dataLogger.print(alt);
+        dataLogger.print(";");
+        dataLogger.print(altMax);
+        dataLogger.println(";");
 
         if (alt > altMax) {
           altMax = alt;
@@ -303,12 +203,20 @@ void loop()
           notLanded=0;
         }
       }
-      Serial.print ("It has ");
+      #if (debugger== true)
+      {
+        Serial.print (F("It has "));
+      }
+      #endif
       current_state = LANDED;
 
       break;
     case LANDED :
-      Serial.println ("LANDED");
+    #if (debugger== true)
+    {
+      Serial.print (F("LANDED"));
+    }
+    #endif
         bmp.setSampling(Adafruit_BMP280::MODE_SLEEP,      /* Operating Mode.       */
                   Adafruit_BMP280::SAMPLING_NONE,   /* Temp. oversampling    */
                   Adafruit_BMP280::SAMPLING_X16,    /* Pressure oversampling */
@@ -316,12 +224,17 @@ void loop()
                   Adafruit_BMP280::STANDBY_MS_1);   /* Standby time.         */
                   digitalWrite(ledReady, HIGH);
                   digitalWrite(ledFlight, HIGH);
-      myFile.close();
+      dataLogger.close();
       break;
     case PROBLEM :
-      Serial.println("problem");
+    #if (debugger== 1)
+    {
+      Serial.print (F("PROBLEM"));
+    }
+    #endif
+
 
       break;
     default : break;
   }
-}*/
+}
