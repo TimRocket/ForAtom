@@ -1,10 +1,12 @@
-#define debbugging true
+#define debugger true
 
 #include <Arduino.h>
-#include <Wire.h>
-#include <SD.h>
-#include <SPI.h>
-#include <Adafruit_BMP280.h>
+
+#include <Wire.h> //I2C
+#include <SD.h>//SD
+#include <SPI.h>//SPI
+#include <Adafruit_BMP280.h>//Pression
+#include "rgb_lcd.h"//LCD
 
 #define buttonGo 2
 #define ledReady 6
@@ -23,6 +25,7 @@ float firstAlt = 0;
 float prevAlt = 0;
 float currentPres = 0;
 
+//bool debugger= false;
 bool desc = false;
 bool error = false;
 bool notLanded = true;
@@ -34,8 +37,8 @@ unsigned long timeApog;
 
 float average_pres(byte n);
 
-File myFile;
-
+File dataLogger;
+rgb_lcd lcd;
 
 //status of the state machine
 typedef enum  {
@@ -85,8 +88,7 @@ void setup()
     pinMode(ledFlight, OUTPUT);
     digitalWrite(ledReady, LOW);
     digitalWrite(ledFlight, LOW);
-
-  #if (debbugging == 1)
+#if (debugger== true)
   {
     Serial.begin(9600);
     Serial.println(F("setup"));  // ecrire les etats des composants qui marchent ou inverse?
@@ -106,9 +108,9 @@ void setup()
   if (!SD.begin(10)) {
     error = true;
   }
- myFile = SD.open("BoiteNoire.txt", FILE_WRITE);
-     myFile.println("Time;Alt;AltMax");
-myFile.close();
+ dataLogger = SD.open("EXAMPLE.txt", FILE_WRITE);
+     dataLogger.println("Time;Alt;AltMax");
+dataLogger.close();
   if (error == false) {
     current_state = READY;
   }
@@ -143,7 +145,7 @@ void loop()
                       Adafruit_BMP280::SAMPLING_X16,
                       Adafruit_BMP280::FILTER_X16,
                       Adafruit_BMP280::STANDBY_MS_1);
-      myFile = SD.open("BoiteNoire.txt", FILE_WRITE);
+      dataLogger = SD.open("EXAMPLE.txt", FILE_WRITE);
       Serial.println("flight");
       while (notLanded == 1) {
         while (millis() - timeStart < 5000) {
@@ -165,7 +167,7 @@ void loop()
 
         alt = 44330 * (1.0 - pow(currentPres / newZero, 0.1903));
 
-        #if (debbugging == 1)
+        #if (debugger == true)
         {
           Serial.print(alt * 100); //serial plotter/monitor
           Serial.print(" ");
@@ -174,12 +176,12 @@ void loop()
         }
         #endif
 
-        myFile.print(millis());
-        myFile.print(";");
-        myFile.print(alt);
-        myFile.print(";");
-        myFile.print(altMax);
-        myFile.println(";");
+        dataLogger.print(millis());
+        dataLogger.print(";");
+        dataLogger.print(alt);
+        dataLogger.print(";");
+        dataLogger.print(altMax);
+        dataLogger.println(";");
 
         if (alt > altMax) {
           altMax = alt;
@@ -201,12 +203,20 @@ void loop()
           notLanded=0;
         }
       }
-      Serial.print ("It has ");
+      #if (debugger== true)
+      {
+        Serial.print (F("It has "));
+      }
+      #endif
       current_state = LANDED;
 
       break;
     case LANDED :
-      Serial.println ("LANDED");
+    #if (debugger== true)
+    {
+      Serial.print (F("LANDED"));
+    }
+    #endif
         bmp.setSampling(Adafruit_BMP280::MODE_SLEEP,      /* Operating Mode.       */
                   Adafruit_BMP280::SAMPLING_NONE,   /* Temp. oversampling    */
                   Adafruit_BMP280::SAMPLING_X16,    /* Pressure oversampling */
@@ -214,10 +224,16 @@ void loop()
                   Adafruit_BMP280::STANDBY_MS_1);   /* Standby time.         */
                   digitalWrite(ledReady, HIGH);
                   digitalWrite(ledFlight, HIGH);
-      myFile.close();
+      dataLogger.close();
       break;
     case PROBLEM :
-      Serial.println("problem");
+    #if (debugger== 1)
+    {
+      Serial.print (F("PROBLEM"));
+    }
+    #endif
+
+
       break;
     default : break;
   }
