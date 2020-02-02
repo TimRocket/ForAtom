@@ -46,6 +46,15 @@ void setup() {
       break;  // leave the loop!
     }
   }
+  if (logfile) {
+    logfile.println(millis());
+    logfile.close();
+
+  }
+  // if the file isn't open, pop up an error:
+  else {
+    tone(4, 300, 100);
+  }
 }
 
 void loop() {
@@ -71,6 +80,6 @@ void loop() {
   }
   // if the file isn't open, pop up an error:
   else {
-    tone(4, 800, 100);
+    tone(4, 1000, 100);
   }
 }
