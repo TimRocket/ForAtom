@@ -403,9 +403,10 @@ void loop()
       dataLogger.print(timeApog);
       dataLogger.print(timeTakeoff);
       dataLogger.close();
-      if (servPos == 0)
-      Servomoteur.write(180);
+      if (servPos == 0){
+      Servomoteur.write(0);
       servPos = 1;
+      }
       break;
 
     case PROBLEM :
