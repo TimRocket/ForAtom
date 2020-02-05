@@ -104,7 +104,7 @@ void setup()
     bmp3.setSampling(Adafruit_BMP280::MODE_SLEEP,      /* Operating Mode.       */
                      Adafruit_BMP280::SAMPLING_NONE,   /* Temp. oversampling    */
                      Adafruit_BMP280::SAMPLING_X16,    /* Pressure oversampling */
-                     Adafruit_BMP280::FILTER_OFF,      /* Filtering.            */
+                     Adafruit_BMP280::FILTER_X2,      /* Filtering.            */
                      Adafruit_BMP280::STANDBY_MS_1);
   }
   tcaselect(1);
@@ -116,7 +116,7 @@ void setup()
     bmp2.setSampling(Adafruit_BMP280::MODE_SLEEP,     /* Operating Mode.       */
                      Adafruit_BMP280::SAMPLING_NONE,   /* Temp. oversampling   */
                      Adafruit_BMP280::SAMPLING_X16,    /* Pressure oversampling */
-                     Adafruit_BMP280::FILTER_OFF,       /* Filtering.            */
+                     Adafruit_BMP280::FILTER_X2,       /* Filtering.            */
                      Adafruit_BMP280::STANDBY_MS_1);   /* Standby time.         */
   }
   tcaselect(0);
@@ -128,7 +128,7 @@ void setup()
     bmp1.setSampling(Adafruit_BMP280::MODE_SLEEP,     /* Operating Mode.       */
                      Adafruit_BMP280::SAMPLING_NONE,   /* Temp. oversampling    */
                      Adafruit_BMP280::SAMPLING_X16,    /* Pressure oversampling */
-                     Adafruit_BMP280::FILTER_OFF,       /* Filtering.            */
+                     Adafruit_BMP280::FILTER_X2,       /* Filtering.            */
                      Adafruit_BMP280::STANDBY_MS_1);   /* Standby time.*/
   }
 
@@ -206,7 +206,7 @@ void loop()
       bmp3.setSampling(Adafruit_BMP280::MODE_NORMAL,     /* Operating Mode.       */
                        Adafruit_BMP280::SAMPLING_NONE,   /* Temp. oversampling   */
                        Adafruit_BMP280::SAMPLING_X16,    /* Pressure oversampling */
-                       Adafruit_BMP280::FILTER_OFF,       /* Filtering.            */
+                       Adafruit_BMP280::FILTER_X2,       /* Filtering.            */
                        Adafruit_BMP280::STANDBY_MS_1);   /* Standby time.         */
 
 
@@ -214,14 +214,14 @@ void loop()
       bmp2.setSampling(Adafruit_BMP280::MODE_NORMAL,     /* Operating Mode.       */
                        Adafruit_BMP280::SAMPLING_NONE,   /* Temp. oversampling   */
                        Adafruit_BMP280::SAMPLING_X16,    /* Pressure oversampling */
-                       Adafruit_BMP280::FILTER_OFF,       /* Filtering.            */
+                       Adafruit_BMP280::FILTER_X2,       /* Filtering.            */
                        Adafruit_BMP280::STANDBY_MS_1);   /* Standby time.         */
 
       tcaselect(0);
       bmp1.setSampling(Adafruit_BMP280::MODE_NORMAL,     /* Operating Mode.       */
                        Adafruit_BMP280::SAMPLING_NONE,   /* Temp. oversampling    */
                        Adafruit_BMP280::SAMPLING_X16,    /* Pressure oversampling */
-                       Adafruit_BMP280::FILTER_OFF,       /* Filtering.            */
+                       Adafruit_BMP280::FILTER_X2,       /* Filtering.            */
                        Adafruit_BMP280::STANDBY_MS_1);   /* Standby time.*/
 #if (debugger == true)
       {
@@ -380,20 +380,20 @@ void loop()
       bmp3.setSampling(Adafruit_BMP280::MODE_SLEEP,      /* Operating Mode.       */
                        Adafruit_BMP280::SAMPLING_NONE,   /* Temp. oversampling    */
                        Adafruit_BMP280::SAMPLING_X16,    /* Pressure oversampling */
-                       Adafruit_BMP280::FILTER_X16,      /* Filtering.            */
+                       Adafruit_BMP280::FILTER_X2,      /* Filtering.            */
                        Adafruit_BMP280::STANDBY_MS_1);
 
       tcaselect(1);
       bmp2.setSampling(Adafruit_BMP280::MODE_SLEEP,     /* Operating Mode.       */
                        Adafruit_BMP280::SAMPLING_NONE,   /* Temp. oversampling   */
                        Adafruit_BMP280::SAMPLING_X16,    /* Pressure oversampling */
-                       Adafruit_BMP280::FILTER_X16,       /* Filtering.            */
+                       Adafruit_BMP280::FILTER_X2,       /* Filtering.            */
                        Adafruit_BMP280::STANDBY_MS_1);   /* Standby time.         */
       tcaselect(0);
       bmp1.setSampling(Adafruit_BMP280::MODE_SLEEP,     /* Operating Mode.       */
                        Adafruit_BMP280::SAMPLING_NONE,   /* Temp. oversampling    */
                        Adafruit_BMP280::SAMPLING_X16,    /* Pressure oversampling */
-                       Adafruit_BMP280::FILTER_X16,       /* Filtering.            */
+                       Adafruit_BMP280::FILTER_X2,       /* Filtering.            */
                        Adafruit_BMP280::STANDBY_MS_1);   /* Standby time.*/
 
       digitalWrite(ledReady, HIGH);
