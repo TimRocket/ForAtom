@@ -35,6 +35,7 @@ bool notLanded = true;
 bool acce = false;
 bool baro = false;
 bool apog = false;
+bool servPos = false;
 
 byte error = 0;
 byte lastError = 0;
@@ -402,8 +403,9 @@ void loop()
       dataLogger.print(timeApog);
       dataLogger.print(timeTakeoff);
       dataLogger.close();
+      if (servPos == 0)
       Servomoteur.write(180);
-
+      servPos = 1;
       break;
 
     case PROBLEM :
