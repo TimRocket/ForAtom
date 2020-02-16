@@ -13,8 +13,9 @@
 #include <PWMServo.h>
 
 #define buttonGo 2
-#define ledReady 6
-#define ledFlight 7
+#define ledRed 6
+#define ledGreen 5
+#define ledBlue 7
 
 #define TCAADDR 0x70
 
@@ -77,16 +78,18 @@ void tcaselect(uint8_t i) {
 
 
 
-void setup()
+void setup() //Led Vert clignotant
 {
   clock.begin();
   lcd.begin(16, 2);
   Servomoteur.attach(SERVO_PIN_A);
   pinMode(buttonGo, INPUT_PULLUP);
-  pinMode(ledReady, OUTPUT);
-  pinMode(ledFlight, OUTPUT);
-  digitalWrite(ledReady, LOW);
-  digitalWrite(ledFlight, LOW);
+  pinMode(ledRed, OUTPUT);
+  pinMode(ledGreen, OUTPUT);
+  pinMode(ledBlue, OUTPUT);
+  digitalWrite(ledRed, LOW);
+  digitalWrite(ledGreen, HIGH);
+  digitalWrite(ledBlue, LOW);
   Servomoteur.write(0);
 #if (debugger == true)
   {
@@ -108,6 +111,7 @@ void setup()
                      Adafruit_BMP280::FILTER_X2,      /* Filtering.            */
                      Adafruit_BMP280::STANDBY_MS_1);
   }
+
   tcaselect(1);
   if (!bmp2.begin())
   {
@@ -120,6 +124,7 @@ void setup()
                      Adafruit_BMP280::FILTER_X2,       /* Filtering.            */
                      Adafruit_BMP280::STANDBY_MS_1);   /* Standby time.         */
   }
+
   tcaselect(0);
   if (!bmp1.begin())
   {
@@ -189,15 +194,22 @@ void loop()
   switch (current_state) {
     case READY :
       while (digitalRead(buttonGo) == 1)  {
-        digitalWrite(ledReady, HIGH);
+
+        digitalWrite(ledGreen, !digitalRead(ledGreen) ); //clignotement led verte
+        delay(200);
+
 #if (debugger == true)
         {
           Serial.println("ready");
         }
 #endif
       }
+
       timeStart = millis();
-      digitalWrite(ledFlight, HIGH);
+
+      //Led orange, nouveau zéro
+      digitalWrite(ledGreen, HIGH);
+      digitalWrite(ledRed, HIGH);
 
       current_state = FLIGHT;
       break;
@@ -232,7 +244,7 @@ void loop()
       while (notLanded == 1) {
 
         //Recalibration
-        while (millis() - timeStart < 5000) {
+        while (millis() - timeStart < 5000) { //Led orange
 
           newZero1 = 0;
           newZero2 = 0;
@@ -265,7 +277,12 @@ void loop()
         }
 
         //Led Status
-        digitalWrite(ledReady, descBaro);
+        digitalWrite(ledRed, descBaro); //je sais pas si il faut laisser
+
+        //Led bleue, vol
+        digitalWrite(ledRed, LOW);
+        digitalWrite(ledGreen, LOW);
+        digitalWrite(ledBlue, HIGH);
 
         // Accelerometer
         mma.read();
@@ -315,7 +332,6 @@ void loop()
             baro = 1;
           }
           descBaro = true;
-          digitalWrite(ledFlight, LOW);
           tone(4, 1000, 100);
 
         }
@@ -324,6 +340,11 @@ void loop()
         if (((acce == 1) || (baro == 1)) && (apog == 0)) {
           apog = 1;
           Servomoteur.write(180);
+          digitalWrite(ledBlue, LOW);
+          //Led orange clignotant, descente
+
+          //pwm avec timer lent
+
         }
 
         //Data Logging
@@ -397,8 +418,7 @@ void loop()
                        Adafruit_BMP280::FILTER_X2,       /* Filtering.            */
                        Adafruit_BMP280::STANDBY_MS_1);   /* Standby time.*/
 
-      digitalWrite(ledReady, HIGH);
-      digitalWrite(ledFlight, HIGH);
+      //Led rouge clignotant
 
       dataLogger.print(timeApog);
       dataLogger.print(timeTakeoff);
@@ -419,6 +439,9 @@ void loop()
       }
 #endif
       lastError = error;
+
+      //Led rouge, problème
+      digitalWrite(ledRed, HIGH);
 
       if ((error & B00010000) != 0) {
         lcd.setCursor (0, 0);
