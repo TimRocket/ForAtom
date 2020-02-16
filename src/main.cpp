@@ -42,6 +42,7 @@ byte error = 0;
 byte lastError = 0;
 
 unsigned long timeApog;
+unsigned long timeCligno;
 unsigned long timeStart;
 unsigned long timeTakeoff;
 
@@ -78,7 +79,7 @@ void tcaselect(uint8_t i) {
 
 
 
-void setup() //Led Vert clignotant
+void setup() //Led Vert
 {
   clock.begin();
   lcd.begin(16, 2);
@@ -192,10 +193,10 @@ void loop()
   //  LANDED,
   //  PROBLEM
   switch (current_state) {
-    case READY :
+    case READY : //clignotement led verte
       while (digitalRead(buttonGo) == 1)  {
 
-        digitalWrite(ledGreen, !digitalRead(ledGreen) ); //clignotement led verte
+        digitalWrite(ledGreen, !digitalRead(ledGreen) );
         delay(200);
 
 #if (debugger == true)
@@ -244,7 +245,7 @@ void loop()
       while (notLanded == 1) {
 
         //Recalibration
-        while (millis() - timeStart < 5000) { //Led orange
+        while (millis() - timeStart < 5000) {
 
           newZero1 = 0;
           newZero2 = 0;
@@ -276,8 +277,16 @@ void loop()
 
         }
 
-        //Led Status
-        digitalWrite(ledRed, descBaro); //je sais pas si il faut laisser
+        //Led jaune clignotant, descente
+        digitalWrite(ledRed, LOW);
+        digitalWrite(ledGreen, LOW);
+        digitalWrite(ledBlue, LOW);
+
+        if (millis()-timeCligno > 200)
+        {
+        digitalWrite(ledGreen, !digitalRead(ledGreen) );
+        digitalWrite(ledRed, !digitalRead(ledRed) );
+        }
 
         //Led bleue, vol
         digitalWrite(ledRed, LOW);
@@ -329,6 +338,7 @@ void loop()
         {
           if (descBaro == false) {
             timeApog = millis();
+            timeCligno = millis();
             baro = 1;
           }
           descBaro = true;
@@ -418,7 +428,6 @@ void loop()
                        Adafruit_BMP280::FILTER_X2,       /* Filtering.            */
                        Adafruit_BMP280::STANDBY_MS_1);   /* Standby time.*/
 
-      //Led rouge clignotant
 
       dataLogger.print(timeApog);
       dataLogger.print(timeTakeoff);
@@ -442,6 +451,8 @@ void loop()
 
       //Led rouge, problème
       digitalWrite(ledRed, HIGH);
+      digitalWrite(ledGreen, LOW);
+      digitalWrite(ledBlue, LOW);
 
       if ((error & B00010000) != 0) {
         lcd.setCursor (0, 0);
