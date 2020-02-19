@@ -337,17 +337,19 @@ void loop()
             baro = 1;
           }
 
-          //Led jaune clignotant, descente
-          if (millis()-timeCligno > 200)
-          {
-          digitalWrite(ledGreen, !digitalRead(ledGreen) );
-          digitalWrite(ledRed, !digitalRead(ledRed) );
-          timeCligno = millis();
-          }
-
           descBaro = true;
           tone(4, 1000, 100);
+        }
 
+        if (apog==1)
+        {
+        //Led jaune clignotant, descente
+        if (millis()-timeCligno > 200)
+        {
+        digitalWrite(ledGreen, !digitalRead(ledGreen) );
+        digitalWrite(ledRed, !digitalRead(ledRed) );
+        timeCligno = millis();
+        }
         }
 
         //voting
@@ -442,6 +444,8 @@ void loop()
 
       if (millis()-timeCligno > 200)
       {
+        digitalWrite(ledBlue, LOW);
+        digitalWrite(ledGreen, LOW);
       digitalWrite(ledRed, !digitalRead(ledRed) );
       timeCligno = millis();
       }
