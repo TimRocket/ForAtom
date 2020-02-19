@@ -341,24 +341,11 @@ void loop()
           tone(4, 1000, 100);
         }
 
-        if (apog==1)
-        {
-        //Led jaune clignotant, descente
-        if (millis()-timeCligno > 200)
-        {
-        digitalWrite(ledGreen, !digitalRead(ledGreen) );
-        digitalWrite(ledRed, !digitalRead(ledRed) );
-        timeCligno = millis();
-        }
-        }
-
         //voting
         if (((acce == 1) || (baro == 1)) && (apog == 0)) {
           apog = 1;
           Servomoteur.write(180);
           digitalWrite(ledBlue, LOW);
-
-
         }
 
         //Data Logging
@@ -392,6 +379,18 @@ void loop()
         //Stores the last values
         firstAlt = prevAlt;
         prevAlt = alt;
+
+        if (apog==1)
+        {
+        //Led jaune clignotant, descente
+        if (millis()-timeCligno > 200)
+        {
+        digitalWrite(ledBlue, LOW);
+        digitalWrite(ledGreen, !digitalRead(ledGreen) );
+        digitalWrite(ledRed, !digitalRead(ledRed) );
+        timeCligno = millis();
+        }
+        }
 
         //Condition for the simple state machine
         if ((apog == 1) && ((alt < 70) || ((event.acceleration.y) / 9.81) < -20 )) {
