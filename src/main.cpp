@@ -277,16 +277,11 @@ void loop()
 
         }
 
-        //Led jaune clignotant, descente
+
         digitalWrite(ledRed, LOW);
         digitalWrite(ledGreen, LOW);
         digitalWrite(ledBlue, LOW);
 
-        if (millis()-timeCligno > 200)
-        {
-        digitalWrite(ledGreen, !digitalRead(ledGreen) );
-        digitalWrite(ledRed, !digitalRead(ledRed) );
-        }
 
         //Led bleue, vol
         digitalWrite(ledRed, LOW);
@@ -341,6 +336,15 @@ void loop()
             timeCligno = millis();
             baro = 1;
           }
+
+          //Led jaune clignotant, descente
+          if (millis()-timeCligno > 200)
+          {
+          digitalWrite(ledGreen, !digitalRead(ledGreen) );
+          digitalWrite(ledRed, !digitalRead(ledRed) );
+          timeCligno = millis();
+          }
+
           descBaro = true;
           tone(4, 1000, 100);
 
@@ -351,9 +355,7 @@ void loop()
           apog = 1;
           Servomoteur.write(180);
           digitalWrite(ledBlue, LOW);
-          //Led orange clignotant, descente
 
-          //pwm avec timer lent
 
         }
 
@@ -437,6 +439,13 @@ void loop()
       Servomoteur.write(0);
       servPos = 1;
       }
+
+      if (millis()-timeCligno > 200)
+      {
+      digitalWrite(ledRed, !digitalRead(ledRed) );
+      timeCligno = millis();
+      }
+
       break;
 
     case PROBLEM :
