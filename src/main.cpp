@@ -36,7 +36,6 @@ bool notLanded = true;
 bool acce = false;
 bool baro = false;
 bool apog = false;
-bool servPos = false;
 
 byte error = 0;
 byte lastError = 0;
@@ -431,11 +430,6 @@ void loop()
       dataLogger.print(timeApog);
       dataLogger.print(timeTakeoff);
       dataLogger.close();
-
-      if (servPos == 0){
-      Servomoteur.write(0);
-      servPos = 1;
-      }
 
       if (millis()-timeCligno > 200)
       {
