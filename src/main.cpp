@@ -44,6 +44,7 @@ unsigned long timeApog;
 unsigned long timeCligno;
 unsigned long timeStart;
 unsigned long timeTakeoff;
+unsigned long timeBip;
 
 File dataLogger;
 rgb_lcd lcd;
@@ -341,6 +342,7 @@ void loop()
           if (descBaro == false) {
             timeApog = millis();
             timeCligno = millis();
+            timeBip = millis();
             baro = 1;
           }
 
@@ -430,6 +432,12 @@ void loop()
       dataLogger.print(timeApog);
       dataLogger.print(timeTakeoff);
       dataLogger.close();
+
+      if (millis()-timeBip > 1000)
+      {
+        tone(4, 1000, 2000);
+      timeBip = millis();
+      }
 
       if (millis()-timeCligno > 200)
       {
