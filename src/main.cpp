@@ -433,7 +433,7 @@ void loop()
       dataLogger.print(timeTakeoff);
       dataLogger.close();
 
-      if (millis()-timeBip > 1000)
+      if (millis()-timeBip > 4000)
       {
         tone(4, 1000, 2000);
       timeBip = millis();
