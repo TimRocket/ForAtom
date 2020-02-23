@@ -351,7 +351,7 @@ void loop()
         //voting
         if (((acce == 1) || (baro == 1)) && (apog == 0)) {
           apog = 1;
-          Servomoteur.write(90);
+          Servomoteur.write(180);
         }
 
         //Data Logging
