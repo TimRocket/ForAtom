@@ -37,6 +37,8 @@ bool acce = false;
 bool baro = false;
 bool apog = false;
 
+char filename[] = "00-00_00.CSV";
+
 byte error = 0;
 byte lastError = 0;
 
@@ -44,7 +46,6 @@ unsigned long timeApog;
 unsigned long timeCligno;
 unsigned long timeStart;
 unsigned long timeTakeoff;
-unsigned long timeBip;
 
 File dataLogger;
 rgb_lcd lcd;
@@ -153,7 +154,7 @@ void setup() //Led Vert
   }
   else {
     clock.getTime();
-    char filename[] = "00-00_00.CSV";
+
 
     filename[0] = clock.dayOfMonth / 10 + '0';
 
@@ -342,7 +343,6 @@ void loop()
           if (descBaro == false) {
             timeApog = millis();
             timeCligno = millis();
-            timeBip = millis();
             baro = 1;
           }
 
@@ -354,6 +354,8 @@ void loop()
         if (((acce == 1) || (baro == 1)) && (apog == 0)) {
           apog = 1;
           Servomoteur.write(180);
+          dataLogger.close();
+          dataLogger = SD.open(filename, FILE_WRITE);
         }
 
         //Data Logging
@@ -432,12 +434,6 @@ void loop()
       dataLogger.print(timeApog);
       dataLogger.print(timeTakeoff);
       dataLogger.close();
-
-      if (millis()-timeBip > 1000)
-      {
-        tone(4, 1000, 2000);
-      timeBip = millis();
-      }
 
       if (millis()-timeCligno > 200)
       {
