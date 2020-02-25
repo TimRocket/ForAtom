@@ -46,6 +46,7 @@ unsigned long timeApog;
 unsigned long timeCligno;
 unsigned long timeStart;
 unsigned long timeTakeoff;
+unsigned long timeBip;
 
 File dataLogger;
 rgb_lcd lcd;
@@ -435,15 +436,12 @@ void loop()
       dataLogger.print(timeTakeoff);
       dataLogger.close();
 
-<<<<<<< HEAD
-=======
       if (millis()-timeBip > 4000)
       {
         tone(4, 1000, 2000);
       timeBip = millis();
       }
 
->>>>>>> 487b3d887277154f3c53c15245ec965bbd65aabe
       if (millis()-timeCligno > 200)
       {
         digitalWrite(ledBlue, LOW);
