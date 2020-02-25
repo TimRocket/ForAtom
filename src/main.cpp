@@ -175,6 +175,19 @@ void setup() //Led Vert
     }
   }
 
+  dataLogger.print(clock.hour, DEC);
+  dataLogger.print(":");
+  dataLogger.print(clock.minute, DEC);
+  dataLogger.print(":");
+  dataLogger.print(clock.second, DEC);
+  dataLogger.print("  ");
+  dataLogger.print(clock.dayOfWeek);
+  dataLogger.print(" ");
+  dataLogger.print(clock.dayOfMonth, DEC);
+  dataLogger.print("/");
+  dataLogger.print(clock.month, DEC);
+  dataLogger.print("/");
+  dataLogger.println(clock.year+2000, DEC);
   dataLogger.println("Time;Alt;Acce;Baro;Acce;descBaro;descAcce;Apog");
 
   if (error == false) {
