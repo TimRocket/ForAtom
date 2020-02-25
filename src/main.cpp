@@ -366,7 +366,7 @@ void loop()
         //voting
         if (((acce == 1) || (baro == 1)) && (apog == 0)) {
           apog = 1;
-          Servomoteur.write(180);
+          Servomoteur.write(100);
           dataLogger.close();
           dataLogger = SD.open(filename, FILE_WRITE);
         }
