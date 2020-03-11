@@ -37,6 +37,7 @@ bool notLanded = true;
 bool acce = false;
 bool baro = false;
 bool apog = false;
+bool ascent = 0;
 
 char filename[] = "00-00_00.CSV";
 
@@ -361,8 +362,13 @@ void loop()
           altMax = alt;
         }
 
+        if ((alt - prevAlt > 0) && (prevAlt - firstAlt > 0) && (alt > 300) && (ascent==0))
+        {
+          ascent = 1;
+        }
+
           //descent and apogee
-        if ((alt - prevAlt < 0) && (prevAlt - firstAlt < 0) && (alt > 300))
+        if ((alt - prevAlt < 0) && (prevAlt - firstAlt < 0) && (alt > 500))
         {
           if (descBaro == false) {
             timeApog = millis();
@@ -416,7 +422,7 @@ void loop()
 
 
         //Condition for the simple state machine
-        if ((apog == 1) && ((alt < 70) || ((event.acceleration.y + offsetAcce) / 9.81) < -20 )) {
+        if ((ascent == 1) && (apog == 1) && ((alt < 70) || ((event.acceleration.y + offsetAcce) / 9.81) < -20 )) {
           notLanded = 0;
         }
       }
