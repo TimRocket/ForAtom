@@ -1,6 +1,6 @@
-#define debugger false
+#define debugger false  // change to TRUE to enter debugger mode
 
-#include <Arduino.h>
+#include <Arduino.h> // needed to convert C++
 
 #include <Wire.h> //I2C
 #include <SD.h>//SD
@@ -10,7 +10,7 @@
 #include <Adafruit_MMA8451.h>//Acce
 #include <Adafruit_Sensor.h>//Acce
 #include "DS1307.h"//RTC
-#include <PWMServo.h>
+#include <PWMServo.h>//servo
 
 #define buttonGo 2
 #define ledRed 6
@@ -19,15 +19,16 @@
 
 #define TCAADDR 0x70
 
-int pres = 0;
-int newZero1 = 0;
+int pres = 0; //variable for the pressure
+int newZero1 = 0; //Pressure at ground level for each barometer
 int newZero2 = 0;
 int newZero3 = 0;
-int alt = 0;
+int alt = 0; //variable for the altitude
 int altZero = 0;
 int prevAlt = 0;
 int firstAlt = 0;
-int altMax = 0;
+int altMax = 0; //maximum altitude
+int offsetAcce = 0; //recalibration of the accelerometer
 
 bool takeOff;
 bool descBaro = false;
@@ -290,7 +291,16 @@ void loop()
           }
           newZero1 = newZero1 / 3;
 
+
+          mma.read();
+          sensors_event_t event;
+          mma.getEvent(&event);
+          offsetAcce = -9.81 - event.acceleration.y;
+
+
         }
+
+
 
         if (apog==1)
         {
@@ -316,17 +326,17 @@ void loop()
         sensors_event_t event;
         mma.getEvent(&event);
 
-        if ((event.acceleration.y / 9.81) < -2 && takeOff == 0) { //needs some real tests
+        if (((event.acceleration.y + offsetAcce ) / 9.81) < -2 && takeOff == 0) { //needs some real tests
           takeOff = 1;
           timeTakeoff = millis();
         }
 
-        if ((event.acceleration.y / 9.81) > 0)
+        if ((event.acceleration.y + offsetAcce / 9.81) > 0)
         {
           descAcce = 1;
         }
 
-        if ((takeOff == 1) && (descAcce == 1) && ((event.acceleration.y / 9.81) < 0.00))
+        if ((takeOff == 1) && (descAcce == 1) && ((event.acceleration.y + offsetAcce / 9.81) < 0.00))
         {
           acce = 1;
         }
@@ -352,7 +362,7 @@ void loop()
         }
 
           //descent and apogee
-        if ((alt - prevAlt < 0) && (prevAlt - firstAlt < 0) && (alt > 100))
+        if ((alt - prevAlt < 0) && (prevAlt - firstAlt < 0) && (alt > 300))
         {
           if (descBaro == false) {
             timeApog = millis();
@@ -367,7 +377,7 @@ void loop()
         //voting
         if (((acce == 1) || (baro == 1)) && (apog == 0)) {
           apog = 1;
-          Servomoteur.write(100);
+          Servomoteur.write(180);
           dataLogger.close();
           dataLogger = SD.open(filename, FILE_WRITE);
         }
@@ -377,7 +387,7 @@ void loop()
         dataLogger.print(";");
         dataLogger.print(alt);
         dataLogger.print(";");
-        dataLogger.print((int)(100*(event.acceleration.y) / 9.81));
+        dataLogger.print((int)(100*(event.acceleration.y + offsetAcce) / 9.81));
         dataLogger.print(";");
         dataLogger.print(baro);
         dataLogger.print(";");
@@ -406,7 +416,7 @@ void loop()
 
 
         //Condition for the simple state machine
-        if ((apog == 1) && ((alt < 70) || ((event.acceleration.y) / 9.81) < -20 )) {
+        if ((apog == 1) && ((alt < 70) || ((event.acceleration.y + offsetAcce) / 9.81) < -20 )) {
           notLanded = 0;
         }
       }
