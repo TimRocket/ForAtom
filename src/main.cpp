@@ -11,6 +11,8 @@
 #include <Adafruit_Sensor.h>//Acce
 #include "DS1307.h"//RTC
 #include <PWMServo.h>//servo
+#include "bmm150.h"
+#include "bmm150_defs.h"
 
 #define buttonGo 2
 #define ledRed 6
@@ -43,6 +45,7 @@ char filename[] = "00-00_00.CSV";
 
 byte error = 0;
 byte lastError = 0;
+unsigned byte compz = 0;
 
 unsigned long timeApog;
 unsigned long timeCligno;
@@ -58,6 +61,8 @@ Adafruit_BMP280 bmp3;
 Adafruit_MMA8451 mma = Adafruit_MMA8451();
 DS1307 clock;
 PWMServo Servomoteur;
+BMM150 bmm = BMM150(); //compass
+bmm150_mag_data value_offset;//compass
 
 //status of the state machine
 typedef enum  {
@@ -193,6 +198,15 @@ void setup() //Led Vert
   dataLogger.println(clock.year+2000, DEC);
   dataLogger.println("Time;Alt;Acce;Baro;Acce;descBaro;descAcce;Apog");
 
+  if (bmm.initialize() == BMM150_E_ID_NOT_CONFORM)
+  {
+    error = error + 16;
+  }
+  else
+  {
+    //mettre le mode veille
+  }
+
   if (error == false) {
     current_state = READY;
   }
@@ -299,8 +313,25 @@ void loop()
           offsetAcce = -9.81 - event.acceleration.y;
 
 
-        }
+            int16_t value_z_min = 0;
+            int16_t value_z_max = 0;
 
+
+          //Code a revoir pas opti , on fait deux fois la mesure il faut le changer en metttant la premiere mesure dans le setup ou avant
+            bmm.read_mag_data();
+            value_z_min = bmm.raw_mag_data.raw_dataz;
+            value_z_max = bmm.raw_mag_data.raw_dataz;
+
+              bmm.read_mag_data();
+
+              /* Update z-Axis max/min value */
+              if (value_z_min > bmm.raw_mag_data.raw_dataz) {
+                value_z_min = bmm.raw_mag_data.raw_dataz;
+
+              } else if (value_z_max < bmm.raw_mag_data.raw_dataz) {
+                value_z_max = bmm.raw_mag_data.raw_dataz;
+              }
+            }
 
 
         if (apog==1)
@@ -495,6 +526,17 @@ void loop()
       digitalWrite(ledRed, HIGH);
       digitalWrite(ledGreen, LOW);
       digitalWrite(ledBlue, LOW);
+
+      if ((error & B00100000) != 0) {
+        lcd.setCursor (0, 0);
+        lcd.print ("Error Comp");
+      }
+      else {
+        lcd.setCursor (0, 0);
+        lcd.print ("Comp OK");
+      }
+      delay (2000);
+      lcd.clear();
 
       if ((error & B00010000) != 0) {
         lcd.setCursor (0, 0);
